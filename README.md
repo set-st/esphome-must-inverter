@@ -51,6 +51,7 @@ This configuration supports all **PV/PH18** and **PV19** series **Must Solar Inv
 - **PV18-3224 VPM**  
 - **PV18-1012 VPM** (Thanks to [@sstepane](https://github.com/sstepane))  
 - **PV19-6248 EXP** (Thanks to [@sergeysaley](https://github.com/sergeysaley))
+- **PV18-2012 ECO** (Thanks to [@Heet80](https://github.com/Heet80))
 
 ## Demo Video
 
