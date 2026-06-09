@@ -51,7 +51,8 @@
 ```mermaid
 graph TD
     subgraph "Waveshare ESP32-C6-LCD-1.47"
-        3V3["3.3V / 5V"]
+        ESP_5V["5V / VCC"]
+        ESP_3V3["3.3V Out"]
         GND1["GND"]
         G16["GPIO16 (TX)"]
         G17["GPIO17 (RX)"]
@@ -67,13 +68,17 @@ graph TD
     end
 
     subgraph "MUST Inverter Port"
+        INV_VCC["VCC 5V (USB Pin 1)"]
         INV_A["A / TR+ (RJ45 Pin 1 / USB Pin 3)"]
         INV_B["B / TR- (RJ45 Pin 2 / USB Pin 2)"]
         INV_GND["GND (RJ45 Pin 8 / USB Pin 4)"]
     end
 
-    %% RS485 Power & Data
-    3V3 --> RS_VCC
+    %% Power from Inverter to ESP32 (if using USB WiFi port)
+    INV_VCC -.->|Опциональное питание ESP| ESP_5V
+
+    %% RS485 Power & Data (from ESP32 to Converter)
+    ESP_3V3 --> RS_VCC
     GND1 --> RS_GND
     G16 --> RS_RXD
     G17 --> RS_TXD
