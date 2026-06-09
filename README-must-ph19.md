@@ -20,10 +20,6 @@
 | **Backlight** | `GPIO22` | Подсветка дисплея (ШИМ-управление) |
 | **Onboard LED**| `GPIO8` | Встроенный адресный светодиод WS2812 |
 
-### Схема подключения
-
-![Схема подключения](docs/wiring_diagram_esp32c6.png)
-
 ### Схема подключения (Mermaid Diagram)
 
 ```mermaid
@@ -41,7 +37,7 @@ graph TD
         G22["GPIO22 (BL)"]
     end
 
-    subgraph "Waveshare 1.47\" LCD (ST7789V)"
+    subgraph "Waveshare 1.47 inch LCD (ST7789V)"
         LCD_VCC["VCC"]
         LCD_GND["GND"]
         LCD_DIN["DIN"]
