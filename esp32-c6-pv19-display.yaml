@@ -3,8 +3,8 @@ substitutions:
   name: "must-ph19"
   device_location: "Tech Room"
   device_description: "Monitor MUST inverter via RS485 on ESP32-C6"
-  tx_pin: GPIO16
-  rx_pin: GPIO17
+  tx_pin: GPIO1
+  rx_pin: GPIO2
 
 esphome:
   name: ${name}
@@ -60,17 +60,19 @@ uart:
   stop_bits: 1
   parity: NONE
   data_bits: 8
+  rx_buffer_size: 1024
 
 modbus:
   id: mod_bus_must
-  send_wait_time: 350ms
+  send_wait_time: 1000ms
 
 modbus_controller:
   - id: must
     address: 0x4
     modbus_id: mod_bus_must
     setup_priority: -10
-    update_interval: 20s
+    update_interval: 60s
+    command_throttle: 1000ms
 
 color:
   - id: color_white
@@ -175,6 +177,7 @@ light:
     num_leds: 1
     chipset: WS2812
     name: "Onboard LED"
+
 
   - platform: monochromatic
     name: "${device_name} Backlight"
@@ -415,6 +418,8 @@ sensor:
     on_value:
       then:
         - lambda: |-
+            if (std::isnan(x)) return;
+            ESP_LOGD("custom", "SOC Value for LED: %.1f", x);
             auto call = id(onboard_led).turn_on();
             if (x < 20) {
               call.set_rgb(1.0, 0.0, 0.0);

@@ -17,8 +17,8 @@
 | :--- | :--- | :--- |
 | **3.3V** / **5V** | **VCC** | Питание конвертера |
 | **GND** | **GND** | Общая земля |
-| **GPIO16 (TX)** | **RXD** | Передача данных Modbus |
-| **GPIO17 (RX)** | **TXD** | Прием данных Modbus |
+| **GPIO1 (TX)** | **RXD** | Передача данных Modbus |
+| **GPIO2 (RX)** | **TXD** | Прием данных Modbus |
 
 ### Подключение конвертера к инвертору MUST:
 
@@ -54,8 +54,8 @@ graph TD
         ESP_5V["5V / VCC"]
         ESP_3V3["3.3V Out"]
         GND1["GND"]
-        G16["GPIO16 (TX)"]
-        G17["GPIO17 (RX)"]
+        G1["GPIO1 (TX)"]
+        G2["GPIO2 (RX)"]
     end
 
     subgraph "RS485 to UART Module"
@@ -80,8 +80,8 @@ graph TD
     %% RS485 Power & Data (from ESP32 to Converter)
     ESP_3V3 --> RS_VCC
     GND1 --> RS_GND
-    G16 --> RS_RXD
-    G17 --> RS_TXD
+    G1 --> RS_RXD
+    G2 --> RS_TXD
 
     %% Modbus to Inverter
     RS_A --- INV_A
