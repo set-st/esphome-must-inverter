@@ -7,48 +7,36 @@
 
 ---
 
-## 🛠️ Аппаратное обеспечение и распиновка (Pinout)
+## 🛠️ Схема внешнего подключения (RS485 / Modbus)
 
-В конфигурации используются следующие выводы платы ESP32-C6:
+Поскольку дисплей и светодиод уже распаяны на самой плате Waveshare ESP32-C6-LCD-1.47, пользователю требуется подключить только внешний модуль **RS485 to UART** для связи с инвертором.
 
-| Компонент | Пин | Описание |
+### Распиновка подключения конвертера к плате:
+
+| Вывод платы Waveshare | Пин конвертера RS485 | Описание |
 | :--- | :--- | :--- |
-| **UART TX** | `GPIO16` | Отправка данных Modbus (RS485) |
-| **UART RX** | `GPIO17` | Прием данных Modbus (RS485) |
-| **SPI CLK** | `GPIO7` | Тактовая частота шины SPI дисплея |
-| **SPI MOSI**| `GPIO6` | Передача данных шины SPI дисплея |
-| **Display CS**| `GPIO14` | Chip Select дисплея ST7789V |
-| **Display DC**| `GPIO15` | Data/Command дисплея ST7789V |
-| **Display RST**| `GPIO21` | Сброс (Reset) дисплея |
-| **Backlight** | `GPIO22` | Подсветка дисплея (ШИМ-управление) |
-| **Onboard LED**| `GPIO8` | Встроенный адресный светодиод WS2812 |
+| **3.3V** / **5V** | **VCC** | Питание конвертера |
+| **GND** | **GND** | Общая земля |
+| **GPIO16 (TX)** | **RXD** | Передача данных Modbus |
+| **GPIO17 (RX)** | **TXD** | Прием данных Modbus |
+
+### Подключение конвертера к инвертору MUST (RJ45):
+
+| Пин конвертера RS485 | Пин порта RJ45 инвертора | Описание |
+| :--- | :--- | :--- |
+| **A / TR+** | **PIN 1** / A | Сигнальная линия A |
+| **B / TR-** | **PIN 2** / B | Сигнальная линия B |
+| **GND** | **PIN 8** | Земля RS485 |
 
 ### Схема подключения (Mermaid Diagram)
 
 ```mermaid
 graph TD
     subgraph "Waveshare ESP32-C6-LCD-1.47"
-        3V3["3.3V"]
+        3V3["3.3V / 5V"]
         GND1["GND"]
         G16["GPIO16 (TX)"]
         G17["GPIO17 (RX)"]
-        G6["GPIO6 (MOSI)"]
-        G7["GPIO7 (SCLK)"]
-        G14["GPIO14 (CS)"]
-        G15["GPIO15 (DC)"]
-        G21["GPIO21 (RST)"]
-        G22["GPIO22 (BL)"]
-    end
-
-    subgraph "Waveshare 1.47 inch LCD (ST7789V)"
-        LCD_VCC["VCC"]
-        LCD_GND["GND"]
-        LCD_DIN["DIN"]
-        LCD_CLK["CLK"]
-        LCD_CS["CS"]
-        LCD_DC["DC"]
-        LCD_RST["RST"]
-        LCD_BL["BL"]
     end
 
     subgraph "RS485 to UART Module"
@@ -66,17 +54,7 @@ graph TD
         INV_GND["PIN 8 / GND"]
     end
 
-    %% LCD Connections
-    3V3 --> LCD_VCC
-    GND1 --> LCD_GND
-    G6 --> LCD_DIN
-    G7 --> LCD_CLK
-    G14 --> LCD_CS
-    G15 --> LCD_DC
-    G21 --> LCD_RST
-    G22 --> LCD_BL
-
-    %% RS485 Connections
+    %% RS485 Power & Data
     3V3 --> RS_VCC
     GND1 --> RS_GND
     G16 --> RS_RXD
