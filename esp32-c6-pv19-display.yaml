@@ -1,7 +1,7 @@
 substitutions:
-  device_name: "Inverter_C6"
-  name: "inverter-c6"
-  device_location: "Garage"
+  device_name: "MUST_PH19"
+  name: "must-ph19"
+  device_location: "Tech Room"
   device_description: "Monitor MUST inverter via RS485 on ESP32-C6"
   tx_pin: GPIO16
   rx_pin: GPIO17
@@ -23,6 +23,10 @@ wifi:
   networks:
     - ssid: !secret wifi_ssid
       password: !secret wifi_password
+  manual_ip:
+    static_ip: 192.168.1.33
+    subnet: 255.255.255.0
+    gateway: 192.168.1.1
   ap:
     ssid: ${device_name}
     password: !secret ap_password
@@ -43,12 +47,6 @@ web_server:
 switch:
   - platform: restart
     name: "${device_name} restart"
-
-  - platform: gpio
-    pin: GPIO22
-    name: "${device_name} Backlight"
-    id: lcd_backlight
-    restore_mode: ALWAYS_ON
 
 spi:
   clk_pin: GPIO7
@@ -116,11 +114,11 @@ display:
     rotation: 270
     lambda: |-
       // Header
-      it.printf(0, 0, id(font_small), id(color_blue), "Must Inverter: %s", "${device_name}");
+      it.printf(15, 0, id(font_small), id(color_blue), "Must Inverter: %s", "${device_name}");
       
       // WiFi Signal
       if (id(wifi_rssi).has_state()) {
-        it.printf(320, 0, id(font_small), id(color_white), TextAlign::TOP_RIGHT, "WiFi: %.0f dBm", id(wifi_rssi).state);
+        it.printf(305, 0, id(font_small), id(color_white), TextAlign::TOP_RIGHT, "WiFi: %.0f dBm", id(wifi_rssi).state);
       }
 
       // Battery SOC
@@ -152,6 +150,23 @@ display:
         it.printf(160, 172, id(font_small), id(color_white), TextAlign::BOTTOM_CENTER, "Battery: %.1f V", id(batt_voltage).state);
       }
 
+      // IP Address
+      if (id(wifi_ip).has_state()) {
+        it.printf(15, 172, id(font_small), id(color_white), TextAlign::BOTTOM_LEFT, "IP: %s", id(wifi_ip).state.c_str());
+      }
+
+text_sensor:
+  - platform: wifi_info
+    ip_address:
+      name: "IP Address"
+      id: wifi_ip
+
+output:
+  - platform: ledc
+    pin: GPIO22
+    id: backlight_pwm
+    frequency: 1000Hz
+
 light:
   - platform: esp32_rmt_led_strip
     id: onboard_led
@@ -160,6 +175,12 @@ light:
     num_leds: 1
     chipset: WS2812
     name: "Onboard LED"
+
+  - platform: monochromatic
+    name: "${device_name} Backlight"
+    output: backlight_pwm
+    id: lcd_backlight
+    restore_mode: RESTORE_DEFAULT_ON
 
 binary_sensor:
   # CE: - Charger Errors from 15213 (id:charger_error_message))
@@ -391,6 +412,18 @@ sensor:
     name: "State of Charge"
     unit_of_measurement: "%"
     register_type: holding
+    on_value:
+      then:
+        - lambda: |-
+            auto call = id(onboard_led).turn_on();
+            if (x < 20) {
+              call.set_rgb(1.0, 0.0, 0.0);
+            } else if (x < 50) {
+              call.set_rgb(1.0, 1.0, 0.0);
+            } else {
+              call.set_rgb(0.0, 1.0, 0.0);
+            }
+            call.perform();
 
   - platform: modbus_controller
     address: 15201
