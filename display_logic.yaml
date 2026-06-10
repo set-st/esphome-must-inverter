@@ -3,7 +3,7 @@
 
 lambda: |-
   // Header
-  it.printf(15, 0, id(font_small), id(color_blue), "Must Inverter: %s", "${device_name}");
+  it.printf(15, 0, id(font_small), id(color_blue), "Inverter: %s", "${device_name}");
   
   // WiFi Signal
   if (id(wifi_rssi).has_state()) {
