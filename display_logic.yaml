@@ -43,3 +43,13 @@ lambda: |-
   if (id(wifi_ip).has_state()) {
     it.printf(15, 172, id(font_small), id(color_white), TextAlign::BOTTOM_LEFT, "IP: %s", id(wifi_ip).state.c_str());
   }
+
+  // UART Activity Indicators
+  if (id(uart_tx_active)) {
+    // Red Up Arrow
+    it.filled_triangle(310, 22, 306, 30, 314, 30, id(color_red));
+  }
+  if (id(uart_rx_active)) {
+    // Green Down Arrow
+    it.filled_triangle(310, 42, 306, 34, 314, 34, id(color_green));
+  }

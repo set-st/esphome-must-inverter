@@ -83,16 +83,40 @@ text_sensor:
     name: "Mock IP"
     id: wifi_ip
 
+globals:
+  - id: uart_tx_active
+    type: bool
+    initial_value: 'false'
+  - id: uart_rx_active
+    type: bool
+    initial_value: 'false'
+
+script:
+  - id: flash_tx
+    then:
+      - lambda: 'id(uart_tx_active) = true;'
+      - delay: 200ms
+      - lambda: 'id(uart_tx_active) = false;'
+  - id: flash_rx
+    then:
+      - lambda: 'id(uart_rx_active) = true;'
+      - delay: 200ms
+      - lambda: 'id(uart_rx_active) = false;'
+
 # SDL Display for host simulation
 display:
   - platform: sdl
     dimensions: 320x172
+    update_interval: 100ms
     <<: !include display_logic.yaml
 
 # Automated value simulation to see it in action
 interval:
-  - interval: 5s
+  - interval: 3s
     then:
+      - script.execute: flash_tx
+      - delay: 500ms
+      - script.execute: flash_rx
       - lambda: |-
           id(wifi_rssi).publish_state(-65);
           id(soc).publish_state(95);
@@ -101,5 +125,5 @@ interval:
           id(load_power).publish_state(1200);
           id(inverter_work_state).publish_state(2);
           id(batt_voltage).publish_state(54.2);
-          id(batt_capacity).publish_state(200);
           id(wifi_ip).publish_state("192.168.1.33");
+          id(batt_capacity).publish_state(100);

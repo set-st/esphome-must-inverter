@@ -12,17 +12,15 @@ esphome:
   min_version: 2024.11.0
   comment: ${device_location}
 
-external_components:
-  - source: github://pr#8032
-    components: [ modbus, uart, modbus_controller ]
+# external_components:
+#   - source: github://pr#8032
+#     components: [ modbus, uart, modbus_controller ]
 
 esp32:
   board: esp32-c6-devkitc-1
   variant: esp32c6
   framework:
     type: esp-idf
-
-logger:
 
 wifi:
   networks:
@@ -57,6 +55,10 @@ switch:
 spi:
   clk_pin: GPIO7
   mosi_pin: GPIO6
+  interface: hardware
+
+logger:
+  hardware_uart: USB_SERIAL_JTAG
 
 uart:
   id: mod_bus
@@ -66,21 +68,30 @@ uart:
   stop_bits: 1
   parity: NONE
   data_bits: 8
-  rx_buffer_size: 10420
-  rx_full_threshold: 1
+  rx_buffer_size: 4096
+  debug:
+    direction: BOTH
+    after:
+      timeout: 100ms
+    sequence:
+      - lambda: |-
+          if (direction == UART_DIRECTION_TX) {
+            id(flash_tx).execute();
+          } else {
+            id(flash_rx).execute();
+          }
 
 modbus:
   id: mod_bus_must
-  send_wait_time: 400ms
-  turnaround_time: 20ms
+  send_wait_time: 1000ms
 
 modbus_controller:
   - id: must
     address: 0x4
     modbus_id: mod_bus_must
     setup_priority: -10
-    update_interval: ${update_interval}
-    command_throttle: 300ms
+    update_interval: 30s
+    command_throttle: 500ms
 
 color:
   - id: color_white
@@ -122,6 +133,7 @@ display:
     dc_pin: GPIO15
     reset_pin: GPIO21
     rotation: 270
+    update_interval: 200ms
     <<: !include display_logic.yaml
 
 text_sensor:
@@ -129,6 +141,28 @@ text_sensor:
     ip_address:
       name: "IP Address"
       id: wifi_ip
+
+globals:
+  - id: uart_tx_active
+    type: bool
+    initial_value: 'false'
+  - id: uart_rx_active
+    type: bool
+    initial_value: 'false'
+
+script:
+  - id: flash_tx
+    mode: restart
+    then:
+      - lambda: 'id(uart_tx_active) = true;'
+      - delay: 150ms
+      - lambda: 'id(uart_tx_active) = false;'
+  - id: flash_rx
+    mode: restart
+    then:
+      - lambda: 'id(uart_rx_active) = true;'
+      - delay: 150ms
+      - lambda: 'id(uart_rx_active) = false;'
 
 output:
   - platform: ledc
