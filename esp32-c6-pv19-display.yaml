@@ -13,8 +13,8 @@ esphome:
   comment: ${device_location}
 
 external_components:
-    - source: github://pr#8032
-      components: [ modbus, uart, modbus_controller ]
+  - source: github://pr#8032
+    components: [ modbus, uart, modbus_controller ]
 
 esp32:
   board: esp32-c6-devkitc-1
@@ -80,7 +80,7 @@ modbus_controller:
     modbus_id: mod_bus_must
     setup_priority: -10
     update_interval: ${update_interval}
-    command_throttle: 2000ms
+    #command_throttle: 2000ms
 
 color:
   - id: color_white
