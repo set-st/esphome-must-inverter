@@ -377,6 +377,13 @@ sensor:
     update_interval: 60s
 
   - platform: modbus_controller
+    address: 10111
+    id: batt_capacity
+    name: "Battery Capacity"
+    unit_of_measurement: "Ah"
+    register_type: holding
+
+  - platform: modbus_controller
     address: 113
     id: soc
     name: "State of Charge"

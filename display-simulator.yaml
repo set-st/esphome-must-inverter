@@ -73,6 +73,10 @@ sensor:
     name: "Mock Battery Voltage"
     id: batt_voltage
     unit_of_measurement: "V"
+  - platform: template
+    name: "Mock Battery Capacity"
+    id: batt_capacity
+    unit_of_measurement: "Ah"
 
 text_sensor:
   - platform: template
@@ -97,4 +101,5 @@ interval:
           id(load_power).publish_state(1200);
           id(inverter_work_state).publish_state(2);
           id(batt_voltage).publish_state(54.2);
+          id(batt_capacity).publish_state(200);
           id(wifi_ip).publish_state("192.168.1.33");

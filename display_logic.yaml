@@ -36,7 +36,7 @@ lambda: |-
   
   // Battery Voltage at footer
   if (id(batt_voltage).has_state()) {
-    it.printf(180, 172, id(font_small), id(color_white), TextAlign::BOTTOM_CENTER, "Battery: %.1f V", id(batt_voltage).state);
+    it.printf(305, 172, id(font_small), id(color_white), TextAlign::BOTTOM_RIGHT, "Battery: %.1f V (%.0f Ah)", id(batt_voltage).state, id(batt_capacity).state);
   }
 
   // IP Address
