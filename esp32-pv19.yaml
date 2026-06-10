@@ -52,6 +52,7 @@ uart:
   stop_bits: 1
   parity: NONE
   data_bits: 8
+  rx_buffer_size: 1024
 
 modbus:
   id: mod_bus_must

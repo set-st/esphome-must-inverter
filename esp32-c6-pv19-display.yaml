@@ -5,11 +5,16 @@ substitutions:
   device_description: "Monitor MUST inverter via RS485 on ESP32-C6"
   tx_pin: GPIO1
   rx_pin: GPIO2
+  update_interval: 120s
 
 esphome:
   name: ${name}
   min_version: 2024.11.0
   comment: ${device_location}
+
+external_components:
+    - source: github://pr#8032
+      components: [ modbus, uart, modbus_controller ]
 
 esp32:
   board: esp32-c6-devkitc-1
@@ -43,6 +48,7 @@ ota:
 
 web_server:
   port: 80
+  version: 3
 
 switch:
   - platform: restart
@@ -60,19 +66,21 @@ uart:
   stop_bits: 1
   parity: NONE
   data_bits: 8
-  rx_buffer_size: 1024
+  rx_buffer_size: 10420
+  rx_full_threshold: 1
 
 modbus:
   id: mod_bus_must
-  send_wait_time: 1000ms
+  send_wait_time: 600ms
+  turnaround_time: 100ms
 
 modbus_controller:
   - id: must
     address: 0x4
     modbus_id: mod_bus_must
     setup_priority: -10
-    update_interval: 60s
-    command_throttle: 1000ms
+    update_interval: ${update_interval}
+    command_throttle: 2000ms
 
 color:
   - id: color_white
