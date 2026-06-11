@@ -37,12 +37,15 @@ font:
   - file: "gfonts://Roboto"
     id: font_small
     size: 14
+    bpp: 4
   - file: "gfonts://Roboto"
     id: font_medium
     size: 20
+    bpp: 4
   - file: "gfonts://Roboto"
     id: font_large
     size: 36
+    bpp: 4
 
 # Mock sensors to control the display state during simulation
 sensor:
