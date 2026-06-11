@@ -1,52 +1,54 @@
-# Документация конфигурации `esp32-c6-pv19-display.yaml`
+# Configuration Documentation for `esp32-c6-pv19-display.yaml`
 
-Данный файл содержит описание специализированной конфигурации ESPHome для платы со встроенным дисплеем **[Waveshare ESP32-C6-LCD-1.47](https://docs.waveshare.com/ESP32-C6-LCD-1.47)**, используемой для мониторинга солнечного гибридного инвертора **Must PH19** по протоколу Modbus (RS485) с выводом информации на локальный дисплей, индикацией статуса на встроенном светодиоде и управлением подсветкой.
+This file provides a detailed description of the specialized ESPHome configuration for the **[Waveshare ESP32-C6-LCD-1.47](https://docs.waveshare.com/ESP32-C6-LCD-1.47)** board, used to monitor **Must PH19/PV19** solar hybrid inverters via the Modbus (RS485) protocol.
 
-> [!NOTE]
-> В самом конфигурационном файле ESPHome в качестве базовой платы указана `esp32-c6-devkitc-1`, так как это стандартный базовый профиль микроконтроллера ESP32-C6 в PlatformIO, полностью совместимый с платой от Waveshare.
+![Display Interface](display-simulator.png)
 
 ---
 
-## 🛠️ Схема внешнего подключения (RS485 / Modbus)
+## External Connection Diagram (RS485 / Modbus)
 
-Поскольку дисплей и светодиод уже распаяны на самой плате Waveshare ESP32-C6-LCD-1.47, пользователю требуется подключить только внешний модуль **RS485 to UART** для связи с инвертором.
+Since the display and LED are already integrated into the Waveshare ESP32-C6-LCD-1.47 board, you only need to connect an external **RS485 to UART** module to communicate with the inverter.
 
-### Распиновка подключения конвертера к плате:
+### Converter to Waveshare Board Pinout:
 
-| Вывод платы Waveshare | Пин конвертера RS485 | Описание |
+| Waveshare Board Pin | RS485 Converter Pin | Description |
 | :--- | :--- | :--- |
-| **3.3V** / **5V** | **VCC** | Питание конвертера |
-| **GND** | **GND** | Общая земля |
-| **GPIO1 (TX)** | **RXD** | Передача данных Modbus |
-| **GPIO2 (RX)** | **TXD** | Прием данных Modbus |
+| **3.3V** / **5V** | **VCC** | Converter power supply |
+| **GND** | **GND** | Common ground (mandatory!) |
+| **IO1 (GPIO1/TX)** | **RXD** | Modbus Data Transmission |
+| **IO2 (GPIO2/RX)** | **TXD** | Modbus Data Reception |
 
-### Подключение конвертера к инвертору MUST:
+> [!IMPORTANT]
+> On this board, pins GPIO16/17 and GPIO12/13 are not suitable for Modbus due to internal hardware conflicts. Use only **IO1** and **IO2**.
 
-Вы можете подключить конвертер RS485 к инвертору одним из двух способов в зависимости от модели инвертора:
+### Connecting the Converter to the MUST Inverter:
 
-#### Вариант А: Через порт RJ45 (RS485 / CAN)
+You can connect the RS485 converter to the inverter in one of two ways, depending on your inverter model:
 
-| Пин конвертера RS485 | Пин порта RJ45 инвертора | Описание |
+#### Option A: Via RJ45 Port (RS485 / CAN)
+
+| RS485 Converter Pin | Inverter RJ45 Port Pin | Description |
 | :--- | :--- | :--- |
-| **A / TR+** | **PIN 1** / A | Сигнальная линия A |
-| **B / TR-** | **PIN 2** / B | Сигнальная линия B |
-| **GND** | **PIN 8** | Земля RS485 |
+| **A / TR+** | **PIN 1** / A | Signal Line A |
+| **B / TR-** | **PIN 2** / B | Signal Line B |
+| **GND** | **PIN 8** | RS485 Ground |
 
-#### Вариант Б: Через порт Wi-Fi (разъем USB Type-A)
+#### Option B: Via Wi-Fi Port (USB Type-A Connector)
 
 > [!WARNING]
-> Этот разъем на инверторе **не является стандартным USB-портом**. В нем нет USB-данных, но присутствуют линии питания +5В и шина RS485. Не подключайте к нему обычные USB-устройства!
+> This connector on the inverter is **not a standard USB port**. It does not provide USB data but carries +5V power lines and the RS485 bus. Do not connect standard USB devices to it!
 
-Для подключения используйте обычный кабель USB Type-A, обрезав один конец для распайки к RS485 конвертеру:
+To connect, use a regular USB Type-A cable, cutting one end to solder to the RS485 converter:
 
-| Пин кабеля USB Type-A | Пин конвертера RS485 | Описание |
+| USB Type-A Cable Pin | RS485 Converter Pin | Description |
 | :--- | :--- | :--- |
-| **Pin 1 (VCC)** | **5V / VCC** на плате ESP | Питание +5В от инвертора (опционально) |
-| **Pin 2 (D-)** | **B / TR-** | Линия RS485-B |
-| **Pin 3 (D+)** | **A / TR+** | Линия RS485-A |
-| **Pin 4 (GND)** | **GND** | Общая земля |
+| **Pin 1 (VCC)** | **5V / VCC** on ESP board | +5V power from inverter (optional) |
+| **Pin 2 (D-)** | **B / TR-** | RS485-B Line |
+| **Pin 3 (D+)** | **A / TR+** | RS485-A Line |
+| **Pin 4 (GND)** | **GND** | Common Ground |
 
-### Схема подключения (Mermaid Diagram)
+### Connection Diagram (Mermaid Diagram)
 
 ```mermaid
 graph TD
@@ -75,7 +77,7 @@ graph TD
     end
 
     %% Power from Inverter to ESP32 (if using USB WiFi port)
-    INV_VCC -.->|Опциональное питание ESP| ESP_5V
+    INV_VCC -.->|Optional ESP Power| ESP_5V
 
     %% RS485 Power & Data (from ESP32 to Converter)
     ESP_3V3 --> RS_VCC
@@ -91,48 +93,38 @@ graph TD
 
 ---
 
-## 🌟 Ключевые отличия от оригинального репозитория
+## Key Differences from the Original Repository
 
-Наш конфигурационный файл [esp32-c6-pv19-display.yaml](esp32-c6-pv19-display.yaml) содержит следующие доработки и оптимизации по сравнению со стандартным шаблоном:
+This configuration is a deep overhaul of the base project. Main improvements include:
 
-### 1. Поддержка ESP32-C6 и ESP-IDF
-* Конфигурация адаптирована под чип ESP32-C6 с использованием современного фреймворка **ESP-IDF**, что обеспечивает лучшую энергоэффективность, работу с современными стандартами Wi-Fi 6 и стабильность шины SPI.
+### 1. Modern Hardware Support (ESP32-C6)
+* **ESP-IDF Framework:** Unlike the original (Arduino), this version uses the professional ESP-IDF framework, ensuring stable UART operation and Wi-Fi 6 support.
+* **Modbus Optimization:** Increased receive buffer (`rx_buffer_size: 1024`) and tuned delays (`command_throttle`, `send_wait_time`) specifically adapted for MUST inverters.
 
-### 2. Фиксированный IP-адрес (Static IP)
-* Для предотвращения потери связи и обеспечения мгновенного подключения настроен статический IP-адрес:
-  * **IP**: `192.168.1.33`
-  * **Маска подсети**: `255.255.255.0`
-  * **Шлюз**: `192.168.1.1`
+### 2. Local Monitoring (LCD Display)
+* **ST7789 Interface:** Real-time data output directly to the board's screen. You don't need to open Home Assistant to see key parameters:
+    * **SOC** (Battery Charge) in large font with color-coded status.
+    * Total solar panel output (**PV Power**).
+    * Household load (**Load Power**).
+    * Battery voltage and inverter work state.
 
-### 3. Информативный дисплей (Waveshare 1.47" 172x320)
-Конфигурация выводит ключевые параметры системы в реальном времени:
-* **Заголовок**: Текущее имя устройства (`Must Inverter: MUST_PH19`).
-* **Wi-Fi**: Уровень сигнала (RSSI) в верхнем правом углу.
-* **IP-адрес**: Отображается в левом нижнем углу для быстрого доступа к веб-интерфейсу.
-* **SOC (Уровень заряда батареи)**: Расположен по центру крупным шрифтом с цветовой индикацией состояния (Зеленый $\ge 50\%$, Желтый $20-49\%$, Красный $< 20\%$).
-* **Мощность**: Отображает текущую суммарную генерацию от солнечных панелей (`PV Power`) и потребляемую нагрузку (`Load Power`).
-* **Статус**: Код текущего рабочего режима инвертора.
-* **Батарея**: Текущее напряжение аккумулятора в вольтах.
+### 3. Intelligent Indication (Smart LED)
+* **Addressable LED:** The built-in WS2812 now acts as a system health indicator.
+* **SOC Logic:** The LED changes color (Green/Yellow/Red) based on the battery charge level, with logic protected against invalid values (`nan`) during communication glitches.
 
-### 4. Плавная регулировка подсветки с памятью
-* Подсветка экрана (`GPIO22`) переведена с обычного переключателя (Вкл/Выкл) на **ШИМ-управление (LEDC)**.
-* В Home Assistant она отображается как диммируемый источник света (Light).
-* Благодаря параметру `restore_mode: RESTORE_DEFAULT_ON`, ESPHome **запоминает последнюю установленную яркость** подсветки и восстанавливает её при перезапуске платы.
-
-### 5. Индикация заряда на Onboard RGB LED
-* Встроенный адресный светодиод платы (`GPIO8`, WS2812) привязан к уровню заряда батареи (`soc`) через триггер `on_value` и меняет цвета аналогично индикатору на дисплее:
-  * **Зелёный** цвет: Заряд $\ge 50\%$ (аккумулятор достаточно заряжен).
-  * **Жёлтый** цвет: Заряд от $20\%$ до $49\%$ (средний уровень).
-  * **Красный** цвет: Заряд $< 20\%$ (низкий уровень заряда).
+### 4. Enhanced Reliability and Comfort
+* **Static IP:** Configured with a static IP address to prevent connection loss.
+* **PWM Backlight:** Screen brightness is smoothly adjustable via Home Assistant and saved after a reboot.
+* **Stability Tweaks:** Fine-tuned Modbus controller settings to minimize CRC errors in the EMI-heavy environment of the inverter.
 
 ---
 
-## 🚀 Как собрать и прошить
+## How to Build and Flash
 
-1. Убедитесь, что ваши пароли Wi-Fi и API-ключи заполнены в файле `secrets.yaml`.
-2. Скомпилируйте прошивку с помощью ESPHome CLI:
+1. Ensure your Wi-Fi passwords and API keys are filled in the `secrets.yaml` file.
+2. Compile the firmware using the ESPHome CLI:
    ```bash
    esphome compile esp32-c6-pv19-display.yaml
    ```
-3. Для первой прошивки или восстановления после сбоя сети подключите плату по USB и воспользуйтесь сайтом [ESPHome Web Tools](https://web.esphome.io/), выбрав скомпилированный файл по пути:
+3. For the initial flash or recovery after a network failure, connect the board via USB and use [ESPHome Web Tools](https://web.io/), selecting the compiled file located at:
    `.esphome/build/must-ph19/.pioenvs/must-ph19/firmware.factory.bin`
