@@ -3,7 +3,7 @@
 This file provides a detailed description of the specialized ESPHome configuration for the **[Waveshare ESP32-C6-LCD-1.47](https://docs.waveshare.com/ESP32-C6-LCD-1.47)** board, used to monitor **Must PH19/PV19** solar hybrid inverters via the Modbus (RS485) protocol.
 
 ![Display Interface](display-simulator.png)
-![Real Device](esp32-c6-pv19-display.jpg)
+![Real Device](esp32-c6-pv19-display.jpg | width=120)
 
 ---
 
