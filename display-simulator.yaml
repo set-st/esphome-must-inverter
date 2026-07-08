@@ -80,6 +80,10 @@ sensor:
     name: "Mock Battery Capacity"
     id: batt_capacity
     unit_of_measurement: "Ah"
+  - platform: template
+    name: "Mock Battery Current"
+    id: batt_current
+    unit_of_measurement: "A"
 
 text_sensor:
   - platform: template
@@ -106,6 +110,16 @@ script:
       - delay: 200ms
       - lambda: 'id(uart_rx_active) = false;'
 
+select:
+  - platform: template
+    name: "Mock Display Mode"
+    id: display_mode
+    options:
+      - "SOC"
+      - "Voltage"
+    initial_option: "SOC"
+    optimistic: true
+
 # SDL Display for host simulation
 display:
   - platform: sdl
@@ -130,3 +144,5 @@ interval:
           id(batt_voltage).publish_state(54.2);
           id(wifi_ip).publish_state("192.168.1.33");
           id(batt_capacity).publish_state(100);
+          id(batt_current).publish_state(-15.4);
+          id(display_mode).publish_state("SOC");

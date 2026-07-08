@@ -139,6 +139,7 @@ display:
     update_interval: 200ms
     <<: !include display_logic.yaml
 
+
 text_sensor:
   - platform: wifi_info
     ip_address:
@@ -166,6 +167,35 @@ script:
       - lambda: 'id(uart_rx_active) = true;'
       - delay: 150ms
       - lambda: 'id(uart_rx_active) = false;'
+  - id: update_led_color
+    then:
+      - lambda: |-
+          auto call = id(onboard_led).turn_on();
+          if (id(display_mode).state == "SOC") {
+            float x = id(soc).state;
+            if (!std::isnan(x)) {
+              if (x < 20) {
+                call.set_rgb(1.0, 0.0, 0.0);
+              } else if (x < 50) {
+                call.set_rgb(1.0, 1.0, 0.0);
+              } else {
+                call.set_rgb(0.0, 1.0, 0.0);
+              }
+              call.perform();
+            }
+          } else {
+            float x = id(batt_voltage).state;
+            if (!std::isnan(x)) {
+              if (x < 49.0) {
+                call.set_rgb(1.0, 0.0, 0.0);
+              } else if (x < 51.5) {
+                call.set_rgb(1.0, 1.0, 0.0);
+              } else {
+                call.set_rgb(0.0, 1.0, 0.0);
+              }
+              call.perform();
+            }
+          }
 
 output:
   - platform: ledc
@@ -428,18 +458,7 @@ sensor:
     register_type: holding
     on_value:
       then:
-        - lambda: |-
-            if (std::isnan(x)) return;
-            ESP_LOGD("custom", "SOC Value for LED: %.1f", x);
-            auto call = id(onboard_led).turn_on();
-            if (x < 20) {
-              call.set_rgb(1.0, 0.0, 0.0);
-            } else if (x < 50) {
-              call.set_rgb(1.0, 1.0, 0.0);
-            } else {
-              call.set_rgb(0.0, 1.0, 0.0);
-            }
-            call.perform();
+        - script.execute: update_led_color
 
   - platform: modbus_controller
     address: 15201
@@ -606,6 +625,9 @@ sensor:
     icon: mdi:sine-wave
     filters:
       multiply: 0.1
+    on_value:
+      then:
+        - script.execute: update_led_color
 
   - platform: modbus_controller
     address: 25206
@@ -719,6 +741,7 @@ sensor:
     address: 25274
     register_type: holding
     value_type: S_WORD
+    id: batt_current
     name: "Battery current"
     unit_of_measurement: "A"
     accuracy_decimals: 1
@@ -734,6 +757,19 @@ select:
       "SUB (Solar/utility/battery)": 2
       "UTI (Utility only)": 3
       "SOL (Solar only)": 4
+
+  - platform: template
+    name: "Display Mode"
+    id: display_mode
+    options:
+      - "SOC"
+      - "Voltage"
+    initial_option: "SOC"
+    optimistic: true
+    restore_value: true
+    on_value:
+      then:
+        - script.execute: update_led_color
 
   - platform: modbus_controller
     id: charger_source_priority

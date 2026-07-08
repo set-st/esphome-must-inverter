@@ -10,13 +10,23 @@ lambda: |-
     it.printf(305, 0, id(font_small), id(color_white), TextAlign::TOP_RIGHT, "WiFi: %.0f dBm", id(wifi_rssi).state);
   }
 
-  // Battery SOC
-  if (id(soc).has_state()) {
-    Color soc_color = id(color_green);
-    if (id(soc).state < 20) soc_color = id(color_red);
-    else if (id(soc).state < 50) soc_color = id(color_yellow);
-    
-    it.printf(160, 60, id(font_large), soc_color, TextAlign::CENTER, "SOC: %.0f%%", id(soc).state);
+  // Battery SOC or Battery Voltage in Center
+  if (id(display_mode).state == "SOC") {
+    if (id(soc).has_state()) {
+      Color soc_color = id(color_green);
+      if (id(soc).state < 20) soc_color = id(color_red);
+      else if (id(soc).state < 50) soc_color = id(color_yellow);
+      
+      it.printf(160, 60, id(font_large), soc_color, TextAlign::CENTER, "SOC: %.0f%%", id(soc).state);
+    }
+  } else {
+    if (id(batt_voltage).has_state()) {
+      Color volt_color = id(color_green);
+      if (id(batt_voltage).state < 49.0) volt_color = id(color_red);
+      else if (id(batt_voltage).state < 51.5) volt_color = id(color_yellow);
+      
+      it.printf(160, 60, id(font_large), volt_color, TextAlign::CENTER, "Volt: %.1f V", id(batt_voltage).state);
+    }
   }
 
   // Power Stats
@@ -34,9 +44,15 @@ lambda: |-
     it.printf(320, 150, id(font_small), id(color_white), TextAlign::BOTTOM_RIGHT, "State: %.0f", id(inverter_work_state).state);
   }
   
-  // Battery Voltage at footer
-  if (id(batt_voltage).has_state()) {
-    it.printf(305, 172, id(font_small), id(color_white), TextAlign::BOTTOM_RIGHT, "Battery: %.1f V (%.0f Ah)", id(batt_voltage).state, id(batt_capacity).state);
+  // Battery Voltage or Current at footer
+  if (id(display_mode).state == "SOC") {
+    if (id(batt_voltage).has_state()) {
+      it.printf(305, 172, id(font_small), id(color_white), TextAlign::BOTTOM_RIGHT, "Battery: %.1f V (%.0f Ah)", id(batt_voltage).state, id(batt_capacity).state);
+    }
+  } else {
+    if (id(batt_current).has_state()) {
+      it.printf(305, 172, id(font_small), id(color_white), TextAlign::BOTTOM_RIGHT, "Current: %.1f A (%.0f Ah)", id(batt_current).state, id(batt_capacity).state);
+    }
   }
 
   // IP Address
