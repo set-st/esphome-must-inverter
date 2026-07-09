@@ -97,6 +97,12 @@ globals:
   - id: uart_rx_active
     type: bool
     initial_value: 'false'
+  - id: uart_tx2_active
+    type: bool
+    initial_value: 'false'
+  - id: uart_rx2_active
+    type: bool
+    initial_value: 'false'
 
 script:
   - id: flash_tx
@@ -109,6 +115,16 @@ script:
       - lambda: 'id(uart_rx_active) = true;'
       - delay: 200ms
       - lambda: 'id(uart_rx_active) = false;'
+  - id: flash_tx2
+    then:
+      - lambda: 'id(uart_tx2_active) = true;'
+      - delay: 200ms
+      - lambda: 'id(uart_tx2_active) = false;'
+  - id: flash_rx2
+    then:
+      - lambda: 'id(uart_rx2_active) = true;'
+      - delay: 200ms
+      - lambda: 'id(uart_rx2_active) = false;'
 
 select:
   - platform: template
@@ -132,8 +148,10 @@ interval:
   - interval: 3s
     then:
       - script.execute: flash_tx
+      - script.execute: flash_tx2
       - delay: 500ms
       - script.execute: flash_rx
+      - script.execute: flash_rx2
       - lambda: |-
           id(wifi_rssi).publish_state(-65);
           id(soc).publish_state(95);

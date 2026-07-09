@@ -62,10 +62,18 @@ lambda: |-
 
   // UART Activity Indicators
   if (id(uart_tx_active)) {
+    // Red Up Arrow (сдвинуто влево на 12px)
+    it.filled_triangle(298, 22, 294, 30, 302, 30, id(color_red));
+  }
+  if (id(uart_rx_active)) {
+    // Green Down Arrow (сдвинуто влево на 12px)
+    it.filled_triangle(298, 42, 294, 34, 302, 34, id(color_green));
+  }
+  if (id(uart_tx2_active)) {
     // Red Up Arrow
     it.filled_triangle(310, 22, 306, 30, 314, 30, id(color_red));
   }
-  if (id(uart_rx_active)) {
+  if (id(uart_rx2_active)) {
     // Green Down Arrow
     it.filled_triangle(310, 42, 306, 34, 314, 34, id(color_green));
   }
